@@ -2,7 +2,7 @@
 
 # %% [markdown]
 
-# Loading required packages and creating database and collections
+# ## Loading required packages and creating database and collections
 
 # %%
 
@@ -22,10 +22,10 @@ mycol = mydb["mycollection"]
 mycol1 = mydb["mycollection1"]
 
 #  reading json in python
-with open('/home/nishanth/mongodb_python_R/data/laureates.json') as f:
+with open('./data/laureates.json') as f:
     json_data = json.load(f)
 
-with open('/home/nishanth/mongodb_python_R/data/prizes.json') as f:
+with open('./data/prizes.json') as f:
     json_data1 = json.load(f)
 
 # inserting json data into collection 'mycollection'
@@ -40,28 +40,38 @@ print(myclient.list_database_names())
 
 # %% [markdown]
 
-# pymongo functions for quering mongodb
+# ## pymongo functions for quering mongodb
+
+# ### find_one() return a document
 
 # %%
 
-# **find_one() return a document
+# find_one() return a document
 print(mydb.mycollection.find_one())
 
+# %% [markdown]
+
+# ## print keys in document fetched
+
+
 # %%
-# print keys in document fetched
 
 # fetching a document from mongodb
 mycollection_doc = mydb.mycollection.find_one()
 
-# **print keys in document fetched
+# print keys in document fetched
 print(list(mycollection_doc.keys()))
 
+# %% [markdown]
+
+# ## find() method Selects documents in a collection or view and returns a cursor to the selected documents
 
 # %%
-
-# **find() method Selects documents in a collection or view and returns a cursor to the selected documents
 
 # returns contents of prizes key in the documents of mycollection
 prices_json = [doc['prizes'] for doc in mydb.mycollection.find()]
 
 print(prices_json)
+
+
+# %%
