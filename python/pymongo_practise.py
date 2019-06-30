@@ -134,3 +134,15 @@ print(count)
 # %% [markdown]
 
 # ## Acessing the substructure of the json for a column in a collection
+
+# %%
+
+# Filter for laureates born in Austria with non-Austria prize affiliation using (.)
+criteria = {"bornCountry": "Austria",
+            "prizes.affiliations.country": {"$ne": "Austria"}}
+
+# Count the number of such laureates
+count = mydb.mycollection.count_documents(criteria)
+print(count)
+
+# %%
