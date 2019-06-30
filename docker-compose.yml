@@ -31,6 +31,8 @@ services:
   python:
     image: python:3
     entrypoint: tail -f /dev/null
+    ports:
+      - 8889:8889
     depends_on:
       - mongo
       - mongo-express
