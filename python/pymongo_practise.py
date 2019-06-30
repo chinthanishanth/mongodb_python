@@ -74,4 +74,63 @@ prices_json = [doc['prizes'] for doc in mydb.mycollection.find()]
 print(prices_json)
 
 
+# %% [markdown]
+
+# ## operators in mongodb
+#  Following are the few query selection operators in mongodb <br>
+#  for more details check the following documentation<br>
+#  https: // docs.mongodb.com/manual/reference/operator/query/
+
+# %% [markdown]
+
+# #### equals($eq), lessthan($lt)
+
 # %%
+
+# lessthan ($lt)
+count = mydb.mycollection.count_documents({"born": {"$lt": "1900"}})
+print(count)
+# equals ($eq)
+count = mydb.mycollection.count_documents({"firstname": {"$eq": "Marie"}})
+print(count)
+# or
+count = mydb.mycollection.count_documents({"firstname": "Marie"})
+
+print(count)
+# %% [markdown]
+
+# #### greaterthan($gt),notequals($ne)
+# %%
+
+# greaterthan ($gt)
+criteria = {"died": {"$gt": "1990"}}
+count = mydb.mycollection.count_documents(criteria)
+print("died after 1990:  ", count)
+# notequals ($ne)
+criteria_ne = {"born": {"$ne": "USA"}}
+count = mydb.mycollection.count_documents(criteria_ne)
+print("not born in USA: ", count)
+# %%[markdown]
+
+# ## multiple filters on collection
+
+# %%
+
+# Create a filter for Germany-born laureates who died in the USA and with the first name "Albert"
+criteria = {"diedCountry": "USA",
+            "bornCountry": "Germany", "firstname": "Albert"}
+
+# Save the count
+count = mydb.mycollection.count_documents(criteria)
+print(count)
+
+# Save a filter for laureates who died in the USA and were not born there
+criteria = {'bornCountry': {"$ne": 'USA'}, 'diedCountry': 'USA'}
+
+# Count them
+count = mydb.mycollection.count_documents(criteria)
+print(count)
+
+# %% [markdown]
+
+# ## Acessing the substructure of the json for a column in a collection
