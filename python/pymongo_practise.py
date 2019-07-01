@@ -133,16 +133,65 @@ print(count)
 
 # %% [markdown]
 
-# ## Acessing the substructure of the json for a column in a collection
+# ## Acessing the substructure of the json for a column in a collection using (.)
 
 # %%
 
-# Filter for laureates born in Austria with non-Austria prize affiliation using (.)
+# Filter for laureates born in Austria with non-Austria prize affiliation
 criteria = {"bornCountry": "Austria",
             "prizes.affiliations.country": {"$ne": "Austria"}}
 
 # Count the number of such laureates
 count = mydb.mycollection.count_documents(criteria)
 print(count)
+
+# %%[markdown]
+
+# ## $exists operator to check weather key present in json structure
+
+# %%
+
+# ## checking the count of  born key not present in all documents - returns 0 indicate born key present in all documents
+criteria = {"born": {"$exists": False}}
+
+mydb.mycollection.count_documents(criteria)
+
+# %%[markdown]
+
+# ## finding the distinct values for the for keys in document in a collection using distinct() method
+
+
+# %%
+# finding the distinct values for the countrys in the prizes array
+mydb.mycollection.distinct("prizes.affiliations.country")
+
+
+# %%
+
+# finding the countries who died country is not equal to the born country
+
+countries = set(mydb.mycollection.distinct("diedCountry")) - \
+    set(mydb.mycollection.distinct("bornCountry"))
+print(countries)
+
+# %%
+
+# find the number of distinct vales for affliation for prizes
+
+count = len((mydb.mycollection.distinct("prizes.affiliations.country")))
+print(count)
+
+# %%[markdown]
+
+# ## finding the distinct values for  the documents after applying filtering
+# distinct method takes the optional filter parameter to filter the documents before applying the
+# distinct criteria
+
+# %%
+
+# In which countries have USA-born laureates had affiliations for their prizes
+mydb.mycollection.distinct("prizes.affiliations.country", {
+                           "bornCountry": "USA"})
+
 
 # %%
