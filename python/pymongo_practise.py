@@ -7,8 +7,11 @@
 # %%
 
 # importing required packages
+from bson.regex import Regex
 import pymongo
 import json
+
+# %%
 
 # connecting to the mongodb
 myclient = pymongo.MongoClient('172.18.0.4', 27017)
@@ -110,6 +113,56 @@ print("died after 1990:  ", count)
 criteria_ne = {"born": {"$ne": "USA"}}
 count = mydb.mycollection.count_documents(criteria_ne)
 print("not born in USA: ", count)
+
+# %%[markdown]
+
+# ## $in and $nin operators
+
+# %%
+
+count = mydb.mycollection.count_documents(
+    {"prizes.category": {"$ne": ["physics", "chemistry", "medicine"]}})
+
+print(count)
+
+count = mydb.mycollection.count_documents(
+    {"prizes.category": {"$nin": ["physics", "chemistry", "medicine"]}})
+
+print(count)
+
+
+# %%[markdown]
+
+# ## $elemMatch operator matches documents that contain an array field with at least one element that matches all the specified query criteria.
+# ## this operator moster used for arrays in json
+
+# %%
+
+# matching the documents in the prizes which matches the criteria category = physics and share =2
+mydb.mycollection.count_documents(
+    {"prizes": {"$elemMatch": {"category": "physics", "year": {"$gt": "1947"}}}})
+
+# %%
+# Save a filter for mycollection with unshared prizes
+unshared = {
+    "prizes": {"$elemMatch": {
+        "category": {"$nin": ["physics", "chemistry", "medicine"]},
+        "share": "1",
+        "year": {"$gte": "1945"},
+    }}}
+
+# Save a filter for mycollection with shared prizes
+shared = {
+    "prizes": {"$elemMatch": {
+        "category": {"$nin": ["physics", "chemistry", "medicine"]},
+        "share": {"$ne": "1"},
+        "year": {"$gte": "1945"},
+    }}}
+
+ratio = mydb.mycollection.count_documents(
+    unshared) / mydb.mycollection.count_documents(shared)
+print(ratio)
+
 # %%[markdown]
 
 # ## multiple filters on collection
@@ -131,6 +184,7 @@ criteria = {'bornCountry': {"$ne": 'USA'}, 'diedCountry': 'USA'}
 count = mydb.mycollection.count_documents(criteria)
 print(count)
 
+
 # %% [markdown]
 
 # ## Acessing the substructure of the json for a column in a collection using (.)
@@ -144,6 +198,25 @@ criteria = {"bornCountry": "Austria",
 # Count the number of such laureates
 count = mydb.mycollection.count_documents(criteria)
 print(count)
+
+# %%
+
+# Save a filter for organization laureates with prizes won before 1945
+before = {
+    "gender": "org",
+    "prizes.year": {"$lt": "1945"},
+}
+
+# Save a filter for organization laureates with prizes won in or after 1945
+in_or_after = {
+    "gender": "org",
+    "prizes.year": {"$gte": "1945"},
+}
+
+n_before = mydb.mycollection.count_documents(before)
+print(n_before)
+n_in_or_after = mydb.mycollection.count_documents(in_or_after)
+print(n_in_or_after)
 
 # %%[markdown]
 
@@ -183,7 +256,7 @@ print(count)
 
 # %%[markdown]
 
-# ## finding the distinct values for  the documents after applying filtering
+# ## finding the distinct values for  the documents after applying filter
 # distinct method takes the optional filter parameter to filter the documents before applying the
 # distinct criteria
 
@@ -193,5 +266,15 @@ print(count)
 mydb.mycollection.distinct("prizes.affiliations.country", {
                            "bornCountry": "USA"})
 
+
+# %%[markdown]
+
+# ## filtering the documents using regular expressions
+
+# %%
+
+# Filter for laureates with "Germany" in their "bornCountry" value
+criteria = {"bornCountry": Regex("Germany")}
+print(set(mydb.mycollection.distinct("bornCountry", criteria)))
 
 # %%
