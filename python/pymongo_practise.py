@@ -270,11 +270,59 @@ mydb.mycollection.distinct("prizes.affiliations.country", {
 # %%[markdown]
 
 # ## filtering the documents using regular expressions
+# #### filtering the documents using regular expressions can be done in two ways<br>
+# #### one by using bson.regex package <br>
+# #### another by using mongodb $regex package <br>
 
 # %%
 
-# Filter for laureates with "Germany" in their "bornCountry" value
+# filtering documents using bson.regex and then applying distinct filter
 criteria = {"bornCountry": Regex("Germany")}
 print(set(mydb.mycollection.distinct("bornCountry", criteria)))
 
 # %%
+
+# filtering the documents using $regex operator
+list(mydb.mycollection.find({"prizes.motivation": {"$regex": "radiation"}}))
+
+# %%[markdown]
+
+# ## By default, queries in MongoDB return all fields in matching documents.
+# ## To limit the amount of data that MongoDB sends to applications,
+# ## you can include a projection document to specify or restrict fields to return
+
+# #### `1` denotes  field should be present while fetching data 
+# #### `0` denotes field should not be present while fetching data
+
+# %%
+
+# selecting only firstname and affiliation country from prizes array
+docs = list(mydb.mycollection.find({},{"firstname": 1,"prizes.affiliations.country": 1,"_id":0}))
+print(docs)
+
+#%%[markdown]
+
+# ## sorting the projected fields using sorted 
+
+# %%
+
+# sorting the output by year in prizes array and born field
+docs = list(mydb.mycollection.find(
+    {"born": {"$gte": "1900"}, "prizes.year": {"$gte": "1954"}},
+    {"born": 1, "prizes.year": 1, "_id": 0}, # projected fields
+    sort=[("prizes.year", 1), ("born", -1)])) # sorted by year and born
+
+print(docs)
+
+#%%
+
+# Sort by ascending year
+sort_spec = [("year", 1)]
+
+cursor = mydb.mycollection1.find({"category": "physics"}, ["year", "laureates.firstname", "laureates.surname"], sort=sort_spec)
+docs = list(cursor)
+
+print(docs)
+
+#%%
+
