@@ -324,5 +324,43 @@ docs = list(cursor)
 
 print(docs)
 
+#%%[markdown]
+
+# ## indexing 
+
+# #### Indexes support the efficient execution of queries in MongoDB. Without indexes, 
+# #### MongoDB must perform a collection scan, i.e. scan every document in a collection, 
+# #### to select those documents that match the query statement. If an appropriate index exists for a query,
+# #### MongoDB can use the index to limit the number of documents it must inspect.
+# %%
+
+# creating a index to increase th perfoemance of the querying 
+
+mydb.mycollection.create_index([("prizes.year",1)])
+
+docs = [doc["firstname"] for doc in mydb.mycollection.find({"prizes.year":{"$gt":"1947"}})]
+
+print(docs)
+
+# %%[markdown]
+
+# ## creating indexes and writing the complex queries
+
 #%%
 
+# creating a compund index and projection to print only selected items
+compound_index = [("prizes.year",1),("bornCountry",1)]
+mydb.mycollection.create_index(compound_index)
+
+# fetching all distinct categories for each country
+for country in mydb.mycollection.distinct("bornCountry"):
+    for category in mydb.mycollection.distinct("prizes.category",{"bornCountry":country}):
+        #output = "country: "+ "{bornCountry} \nprizes: {prizes}".format(**category)
+        output = "country: "+country+", category: " +category
+        print(output)
+
+
+#%%
+
+
+#%%
