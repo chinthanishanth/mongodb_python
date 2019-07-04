@@ -360,7 +360,30 @@ for country in mydb.mycollection.distinct("bornCountry"):
         print(output)
 
 
-#%%
+#%% 
+
+#  both  country of birth ("bornCountry") and a country of affiliation for one or more of their prizes ("prizes.affiliations.country")
+#  are same ,find the top 5 countries having most counts
 
 
+
+from collections import Counter
+# collecting results in set
+docs  = {
+ country : mydb.mycollection.count_documents({
+        "bornCountry": country,
+        "prizes.affiliations.country": country
+    }) for country in  mydb.mycollection.distinct("bornCountry")
+}
+
+print(docs)
+
+print("\n =================== priting the top 5 counries with most count ===================\n")
+
+# display the top five countries using Counter in collection package 
+
+five_most_common = Counter(docs).most_common(5)
+print(five_most_common)
+
 #%%
+
