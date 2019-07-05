@@ -361,13 +361,14 @@ for country in mydb.mycollection.distinct("bornCountry"):
 
 
 #%% 
-
+#  writing complex queries 
 #  both  country of birth ("bornCountry") and a country of affiliation for one or more of their prizes ("prizes.affiliations.country")
 #  are same ,find the top 5 countries having most counts
 
 
 
 from collections import Counter
+from pprint import pprint
 # collecting results in set
 docs  = {
  country : mydb.mycollection.count_documents({
@@ -376,14 +377,28 @@ docs  = {
     }) for country in  mydb.mycollection.distinct("bornCountry")
 }
 
-print(docs)
+pprint(docs)
 
 print("\n =================== priting the top 5 counries with most count ===================\n")
 
 # display the top five countries using Counter in collection package 
 
 five_most_common = Counter(docs).most_common(5)
-print(five_most_common)
+pprint(five_most_common)
+
+# %%[markdown]
+
+# ## setting limits for data extaction
+# ## method chaining for for complex operations
+
+
+# %%
+
+# setting limits for the data extracted, here extracting only two documents
+
+[doc["prizes"] for doc in mydb.mycollection.find({"prizes.year":{"$gt":"1947"}}).limit(2)]
+
+# %%
+
 
 #%%
-
