@@ -399,6 +399,56 @@ pprint(five_most_common)
 [doc["prizes"] for doc in mydb.mycollection.find({"prizes.year":{"$gt":"1947"}}).limit(2)]
 
 # %%
+# methods chaining like (sort,skip and limit) 
 
+from pprint import pprint
+
+# a function to retrieve a page of data
+def get_particle_laureates(page_number=1, page_size=3):
+    if page_number < 1 or not isinstance(page_number, int):
+        raise ValueError("Pages are natural numbers (starting from 1).")
+    particle_laureates = list(
+        mydb.mycollection.find(
+            {"prizes.motivation": {"$regex": "particle"}},
+            ["firstname", "surname", "prizes"])
+        .sort([("prizes.year", 1), ("surname", 1)])
+        .skip(page_size * (page_number - 1))
+        .limit(page_size))
+    return particle_laureates
+
+pages = [get_particle_laureates(page_number=page) for page in range(1,9)]
+pprint(pages[0])
+#%%[markdown]
+
+# ## mongodb aggregation framework
+# #### The aggregation pipeline is a framework for data aggregation modeled on the concept of data processing pipelines. 
+# #### Documents enter a multi-stage pipeline that transforms the documents into aggregated results.
+# ## Pipeline
+# #### The MongoDB aggregation pipeline consists of stages.
+# #### Each stage transforms the documents as they pass through the pipeline.
+# #### Pipeline stages do not need to produce one output document for every input document; 
+# #### e.g., some stages may generate new documents or filter out documents.
+# #### Pipeline stages can appear multiple times in the pipeline
 
 #%%
+
+# convert the following find method query to aggregation operation
+
+cursor = (mydb.mycollection.find(
+    {"gender": {"$ne": "org"}},
+    ["bornCountry", "prizes.affiliations.country"]
+).limit(3))
+
+# aggregation pipeline equalent for the above query
+pipeline = [
+    {"$match": {"gender": {"$ne": "org"}}},
+    {"$project": {"bornCountry": 1, "prizes.affiliations.country": 1}},
+    {"$limit": 3}
+]
+
+# printing results to console
+for doc in mydb.mycollection.aggregate(pipeline):
+    print("{bornCountry}: {prizes}".format(**doc))
+
+#%%
+
