@@ -429,10 +429,20 @@ pprint(pages[0])
 # #### Pipeline stages do not need to produce one output document for every input document; 
 # #### e.g., some stages may generate new documents or filter out documents.
 # #### Pipeline stages can appear multiple times in the pipeline
+# ## Types aggregation pipelines
+# #### there are two types of aggregation pipelines <br>
+# #### 1. Aggregation Pipeline Stages and 2. Aggregation Pipeline Operators
+# ## 1. Aggregation Pipeline Stages 
+# #### $match,$project ,$limit,$group,$sort etc... comes under Aggregation Pipeline Stages
+# ## 2. Aggregation Pipeline Operators
+# #### $size,$sum,$ne etc... comes under Aggregation Pipeline Operators <br>
+# #### for more details read offical docs <br>
+# #### https://docs.mongodb.com/manual/reference/operator/
+
 
 #%%
 
-# convert the following find method query to aggregation operation
+# convert the following find method query with projection to aggregation operation
 
 cursor = (mydb.mycollection.find(
     {"gender": {"$ne": "org"}},
@@ -450,5 +460,43 @@ pipeline = [
 for doc in mydb.mycollection.aggregate(pipeline):
     print("{bornCountry}: {prizes}".format(**doc))
 
+#%%[markdown]
+
+# ## more advanced aggregation capabilities of mongodb
+# ## using operator expressions and field names 
+# #### for more details read offical docs <br>
+# #### https://docs.mongodb.com/manual/meta/aggregation-quick-reference/#expressions
+
+# %%
+
+pipeline = [
+    {"$project":{
+    "laureates_cnt":{"$size" : "$laureates"}}} # count the number of documents in array using $size operator
+]
+
+list(mydb.mycollection1.aggregate(pipeline))
+
 #%%
 
+pipeline = [
+    {"$group":{"_id":"$category"}} # fetching distinct categories using $group
+]
+
+list(mydb.mycollection1.aggregate(pipeline))
+
+#%%
+
+# category wise count of laureates
+# $group and $sort comes under aggregation pipeline stages
+pipeline = [
+    {"$group":{"_id" : "$category", "total_laureates":{"$sum":1}}}, 
+    {"$sort": {"total_laureates":-1}}
+]
+
+list(mydb.mycollection1.aggregate(pipeline))
+
+
+#%%
+mydb.mycollection1.find_one()
+
+#%%
