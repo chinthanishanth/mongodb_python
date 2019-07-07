@@ -10,7 +10,7 @@
 from bson.regex import Regex
 import pymongo
 import json
-
+from pprint import pprint
 # %%
 
 # connecting to the mongodb
@@ -38,7 +38,7 @@ mycol.insert(json_data)
 mycol1.insert(json_data1)
 
 # printing the database names
-print(myclient.list_database_names())
+pprint(myclient.list_database_names())
 
 
 # %% [markdown]
@@ -50,7 +50,7 @@ print(myclient.list_database_names())
 # %%
 
 # find_one() return a document
-print(mydb.mycollection.find_one())
+pprint(mydb.mycollection.find_one())
 
 # %% [markdown]
 
@@ -63,7 +63,7 @@ print(mydb.mycollection.find_one())
 mycollection_doc = mydb.mycollection.find_one()
 
 # print keys in document fetched
-print(list(mycollection_doc.keys()))
+pprint(list(mycollection_doc.keys()))
 
 # %% [markdown]
 
@@ -74,7 +74,7 @@ print(list(mycollection_doc.keys()))
 # returns contents of prizes key in the documents of mycollection
 prices_json = [doc['prizes'] for doc in mydb.mycollection.find()]
 
-print(prices_json)
+pprint(prices_json)
 
 
 # %% [markdown]
@@ -224,8 +224,8 @@ print(n_in_or_after)
 
 # %%
 
-# ## checking the count of  born key not present in all documents - returns 0 indicate born key present in all documents
-criteria = {"born": {"$exists": False}}
+# ## checking the count of  born key  present in all documents - returns 6538 indicate born key present in all documents
+criteria = {"born": {"$exists": True}}
 
 mydb.mycollection.count_documents(criteria)
 
@@ -241,8 +241,7 @@ mydb.mycollection.distinct("prizes.affiliations.country")
 
 # %%
 
-# finding the countries who died country is not equal to the born country
-
+# finding the countries where laureutes their born country is different from country they died
 countries = set(mydb.mycollection.distinct("diedCountry")) - \
     set(mydb.mycollection.distinct("bornCountry"))
 print(countries)
@@ -278,7 +277,7 @@ mydb.mycollection.distinct("prizes.affiliations.country", {
 
 # filtering documents using bson.regex and then applying distinct filter
 criteria = {"bornCountry": Regex("Germany")}
-print(set(mydb.mycollection.distinct("bornCountry", criteria)))
+pprint(set(mydb.mycollection.distinct("bornCountry", criteria)))
 
 # %%
 
@@ -289,7 +288,7 @@ list(mydb.mycollection.find({"prizes.motivation": {"$regex": "radiation"}}))
 
 # ## By default, queries in MongoDB return all fields in matching documents.
 # ## To limit the amount of data that MongoDB sends to applications,
-# ## you can include a projection document to specify or restrict fields to return
+# ## we can include a projection document to specify or restrict fields to return
 
 # #### `1` denotes  field should be present while fetching data 
 # #### `0` denotes field should not be present while fetching data
@@ -298,11 +297,11 @@ list(mydb.mycollection.find({"prizes.motivation": {"$regex": "radiation"}}))
 
 # selecting only firstname and affiliation country from prizes array
 docs = list(mydb.mycollection.find({},{"firstname": 1,"prizes.affiliations.country": 1,"_id":0}))
-print(docs)
+pprint(docs)
 
 #%%[markdown]
 
-# ## sorting the projected fields using sorted 
+# ## sorting the projected fields using sort argument 
 
 # %%
 
@@ -312,7 +311,7 @@ docs = list(mydb.mycollection.find(
     {"born": 1, "prizes.year": 1, "_id": 0}, # projected fields
     sort=[("prizes.year", 1), ("born", -1)])) # sorted by year and born
 
-print(docs)
+pprint(docs)
 
 #%%
 
@@ -340,7 +339,7 @@ mydb.mycollection.create_index([("prizes.year",1)])
 
 docs = [doc["firstname"] for doc in mydb.mycollection.find({"prizes.year":{"$gt":"1947"}})]
 
-print(docs)
+pprint(docs)
 
 # %%[markdown]
 
@@ -348,7 +347,7 @@ print(docs)
 
 #%%
 
-# creating a compund index and projection to print only selected items
+# creating a compound index and projection to print only selected items
 compound_index = [("prizes.year",1),("bornCountry",1)]
 mydb.mycollection.create_index(compound_index)
 
@@ -471,7 +470,7 @@ for doc in mydb.mycollection.aggregate(pipeline):
 
 pipeline = [
     {"$project":{
-    "laureates_cnt":{"$size" : "$laureates"}}} # count the number of documents in array using $size operator
+    "laureates_cnt":{"$size" : "$laureates"}}} # count the number of documents in array(laureates) using $size operator
 ]
 
 list(mydb.mycollection1.aggregate(pipeline))
@@ -493,10 +492,7 @@ pipeline = [
     {"$sort": {"total_laureates":-1}}
 ]
 
-list(mydb.mycollection1.aggregate(pipeline))
+list(mydb.mycollection1.aggregate(pipeline)) 
 
-
-#%%
-mydb.mycollection1.find_one()
 
 #%%
