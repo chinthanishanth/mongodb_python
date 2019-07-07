@@ -495,4 +495,50 @@ pipeline = [
 list(mydb.mycollection1.aggregate(pipeline)) 
 
 
+#%%[markdown]
+
+# ## creating a complex aggregation pipe line
+# #### counting the number of elements in each array for each id
+# #### summing up  count of array for each id by category(grouping)
+# #### sorting the result in descending order
+
+#%%
+pipeline = [
+    {"$project" : {"n_laureates" : {"$size":"$laureates"},"category":1}},
+    {"$group" : {"_id":"$category","n_laureates":{"$sum":"$n_laureates"}}},
+    {"$sort" :{"n_laureates":-1}}
+]
+
+list(mydb.mycollection1.aggregate(pipeline))
+
+#%%[markdown]
+
+# ## $groupby with $concat for combination of multiple fields grouping
+
+
+#%%
+
+pipeline = [
+    {"$unwind":"$laureates"},
+    {"$project":{"year":1,"category":1,"laureates.id":1}},
+    {"$group":{"_id":{"$concat":["$category",":","$year"]},"laureates_ids":{"$addToSet":"$laureates.id"}}},
+    {"$limit":5}
+]
+result= list(mydb.mycollection1.aggregate(pipeline))
+pprint(result)
+#%%[markdown]
+
+# ## $unwind create a new document for every element in the array
+
+#%%
+
+# using $unwind to access the array elements as new document
+
+pipeline = [
+    {"$unwind":"$laureates"},#unpacking array elements into documents
+    {"$project":{"_id":0,"year":1,"category":1,"laureates.surname":1,"laureates.share":1}}, # acessing the document keys in array
+    {"$limit":3}
+]
+list(mydb.mycollection1.aggregate(pipeline))
+
 #%%
